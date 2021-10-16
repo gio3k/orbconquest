@@ -1,0 +1,8 @@
+"orbconquest"
+{
+    "base"          "base"
+    "title"         "OrbConquest"
+    "maps"          "^obc_"
+    "category"      "pvp"
+    "menusystem"    "1"
+}
