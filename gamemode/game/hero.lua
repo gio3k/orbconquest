@@ -16,6 +16,9 @@ HeroDefinition = {
     --- Identifier name of hero
     name = "",
 
+    --- Weapon identifier
+    weapon = "",
+
     --- Hero abilities [AbilityController]
     abilities = {}
 }

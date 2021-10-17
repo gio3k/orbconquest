@@ -59,9 +59,13 @@ function MatchPlayer:recieve(request_code, data)
         for _, hero in ipairs(HeroRegistry) do
             if (hero.name == data) then
                 -- Exists!
-                -- Set player hero to that hero and then send OK response back
-                self.hero = hero
+                -- Set player hero to that hero
+                self:setHero(hero)
+
+                -- Send OK response to client
                 send_response_to_client(self.ply, request_code, NetworkDefinitions.ResponseCode.OKGeneric)
+
+                -- Increment ready count
                 self.match:incrementReadyCount()
                 return
             end
@@ -72,6 +76,18 @@ function MatchPlayer:recieve(request_code, data)
         send_response_to_client(self.ply, request_code, NetworkDefinitions.ResponseCode.FailGeneric, "INVALID_PICK")
         return
     end
+end
+
+--- Set player hero to specified hero
+--- @param hero HeroDefinition: Hero to set player to
+function MatchPlayer:setHero(hero)
+    self.hero = hero
+
+    -- Remove weapons from player first
+    self.ply:StripWeapons()
+
+    -- Add new hero weapon to player
+    self.ply:Give(hero.weapon)
 end
 
 --- Give player an item
