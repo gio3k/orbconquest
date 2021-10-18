@@ -22,8 +22,8 @@ AbilityController = {
     --- Reference to player with this ability
     ply = nil,
 
-    --- Item modifiers [ItemDefinition]
-    modifiers = {},
+    --- Linked items [OrbDefinition]
+    items = {},
 
     --- Cooldown of ability before orb multipliers
     base_cooldown = 0,
@@ -40,6 +40,30 @@ AbilityController = {
     __cooldown_full_length = 0
 }
 
+--- [SERVER]
+--- Add item to ability
+--- @param item InventoryItem: item to add to ability
+function AbilityController:addItem(item)
+    table.insert(self.items, item)
+end
+
+--- [SERVER]
+--- Remove item from ability using UID
+--- @param uid number / string: Item UID
+function AbilityController:removeItemByUid(uid)
+    for index, item in pairs(self.items) do
+        if (item.uid == uid) then
+            -- Remove item
+            table.remove(self.items, index)
+            print("Removed item from AbilityController")
+            return
+        end
+    end
+
+    return nil
+end
+
+--- [SERVER]
 --- Calculate and return ability cooldown length
 --- @return number: ability cooldown length in seconds
 function AbilityController:getCooldownLength()
@@ -49,25 +73,47 @@ function AbilityController:getCooldownLength()
     end
 
     local cooldown = self.base_cooldown
-    for _, item in ipairs(self.modifiers) do
+    for _, item in ipairs(self.items) do
+        local orb = item.data
         -- Check if item controls cooldowns
-        if (item.cooldown) then
-            cooldown = item.data.updateCooldown(self.ply, cooldown)
+        if (orb.cooldown) then
+            cooldown = orb:updateCooldown(self.ply, cooldown)
         end
     end
     return cooldown
 end
 
+--- [SERVER]
+--- Activate orb on-hit effects
+--- @param position Vector: position of hit effect
+function AbilityController:activateOnHit(position)
+    for _, item in ipairs(self.items) do
+        local orb = item.data
+        -- Check if orb has on-hit effect
+        if (orb.hit_effect) then
+            orb:onHitEffect(position)
+        end
+    end
+end
+
 --- Calculate and return ability damage
 --- @return number: ability damage
 function AbilityController:getDamage()
+    -- Will just return base damage on client side
     local damage = self.base_damage
-    for _, item in ipairs(self.modifiers) do
+
+    if (CLIENT) then
+        return damage    
+    end
+
+    for _, item in ipairs(self.items) do
+        local orb = item.data
         -- Check if item controls damage
-        if (item.damage) then
-            damage = item.data.updateDamage(self.ply, damage)
+        if (orb.damage) then
+            damage = orb:updateDamage(self.ply, damage)
         end
     end
+    print(damage)
     return damage
 end
 
@@ -103,8 +149,20 @@ function AbilityController:resetCooldownProgress()
     if (SERVER) then
         self.__cooldown_timer_set = CurTime()
     else
-        self.__cooldown_ready_time = CurTime() + self.base_cooldown 
+        -- Set predicted cooldown timer
+        self:setClientReadyTime(CurTime() + self.base_cooldown)
+        
+        -- Request real timer from server
+        send_request_to_server(NetworkDefinitions.CSRequestCode.HERO_ABILITY_CD_GET, self.name)
     end
+end
+
+--- [CLIENT]
+--- Set __cooldown_ready_time
+--- @param time number: New client ready time
+function AbilityController:setClientReadyTime(time)
+    -- I'd rather have a function set __cooldown_ready_time when used from outside this class so this exists
+    self.__cooldown_ready_time = time
 end
 
 --- Create a new AbilityController object

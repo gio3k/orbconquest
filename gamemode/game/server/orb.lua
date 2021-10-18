@@ -12,6 +12,9 @@ OrbDefinition = {
     --- Whether or not the orb controls cooldowns
     cooldown = false,
 
+    --- Whether or not the orb has a function activated by attacks
+    hit_effect = false,
+
     --- Whether or not the orb has an active
     active = false,
 
@@ -26,6 +29,11 @@ OrbDefinition = {
     --- @param time number: provided weapon cooldown
     --- @return number: new weapon cooldown
     updateCooldown = function(ply, time) return time end,
+
+    --- Activate on hit effect
+    --- Should be overridden by orbs requiring it
+    --- @param position Vector: position of hit effect
+    onHitEffect = function(position) end,
 
     --- Action when first using orb
     --- Should be overridden by orbs requiring it

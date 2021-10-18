@@ -9,7 +9,7 @@ function SWEP:CreateAbilities()
 
     self.PrimaryAbility.display = "Punch"
     self.PrimaryAbility.name = "slasher_primary_punch"
-    self.PrimaryAbility.base_cooldown = 1
+    self.PrimaryAbility.base_cooldown = 5
     self.PrimaryAbility.base_damage = 10
 
     self.SecondaryAbility.display = "Guiding Spike"
@@ -62,6 +62,7 @@ function SWEP:SecondaryAttack()
 	ent:SetPos(self.Owner:EyePos() + (self.Owner:GetAimVector() * 25))
 	ent:SetAngles(self.Owner:EyeAngles())
 	ent.Direction = self.Owner:GetAimVector()
+    --ent:SetCollisionGroup(COLLISION_GROUP_PLAYER_MOVEMENT)
 	ent.Attacker = self.Owner
 	ent:Spawn()
 	
@@ -74,10 +75,14 @@ function SWEP:SecondaryAttack()
     end
 	
     -- Handle collision
-	function PhysicsCollide( ent, data )
+	function PhysicsCollide(ent, data)
 		if (!IsValid(ent)) then ent:Remove() return end
-		if (data.HitEntity:GetClass() == "player") then
-			ent.Attacker:GetActiveWeapon().Alternate.LastAction = 0
+		if (data.HitEntity:GetClass() == "player" and data.HitEntity ~= ent) then
+            -- Proc on-hit effects
+            self.SecondaryAbility:activateOnHit(data.HitPos)
+            
+            -- Do damage
+            data.HitEntity:TakeDamage(self.SecondaryAbility:getDamage(), self.Owner, ent)
 		else
 		end
 		ent:Remove()
@@ -86,8 +91,15 @@ function SWEP:SecondaryAttack()
 	ent:AddCallback("PhysicsCollide", PhysicsCollide) 
 	
     -- Apply force and remove gravity
-	local velocity = self.Owner:GetAimVector()
-	velocity = velocity * 2000
-	ent_phys:ApplyForceCenter(velocity)
+	local ply_aimvector = self.Owner:GetAimVector()
+    local ply_velocity = self.Owner:GetVelocity()
+    local multiplier = (ply_velocity:LengthSqr() * 0.085)
+
+    -- Apply minimum to multiplier
+    multiplier = math.min(1500)
+
+    local ent_velocity = ply_aimvector * multiplier
+
+	ent_phys:ApplyForceCenter(ent_velocity)
     ent_phys:EnableGravity(false)
 end

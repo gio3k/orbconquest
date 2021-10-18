@@ -61,6 +61,16 @@ function HudHeroSelect:createWindow(w, h, s)
     Button2.DoClick = function()
         send_request_to_server(NetworkDefinitions.CSRequestCode.HERO_SELECT_PICK, "invalid!!!!!!")
     end
+
+    -- Create buttons for selecting hero
+    local Button3 = vgui.Create("DButton", self.frame)
+    Button3:SetText( "select slasher" )
+    Button3:SetTextColor( Color(0,0,0) )
+    Button3:SetPos( 100, 500 )
+    Button3:SetSize( 200, 30 )
+    Button3.DoClick = function()
+        send_request_to_server(NetworkDefinitions.CSRequestCode.HERO_SELECT_PICK, "slasher")
+    end
 end
 
 function HudHeroSelect:create(scale)
@@ -72,10 +82,10 @@ function HudHeroSelect:create(scale)
     if (self.frame == nil) then
         gui.EnableScreenClicker(true)
         self:createWindow(1800, 1000, scale)
+        self.frame:SetDeleteOnClose(true)
     else
         -- If hero select already existed, remove it
         gui.EnableScreenClicker(false)
-        self.frame:SetDeleteOnClose(true)
         self.frame:Close()
         self.frame = nil
         return

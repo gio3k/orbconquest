@@ -15,6 +15,7 @@ include("game/ability.lua") -- Provides: AbilityController, class
 
 -- Load heroes
 include("game/heroes/test_hero.lua")
+include("game/heroes/slasher.lua")
 
 function GM:Initialize()
     print("OrbConquest, par0-git@"..self.Website)

@@ -73,6 +73,7 @@ function MatchPlayer:recieve(request_code, data)
 
         -- At this point the hero does not exist
         print("Client tried to pick invalid hero")
+        print(self.ply)
         send_response_to_client(self.ply, request_code, NetworkDefinitions.ResponseCode.FailGeneric, "INVALID_PICK")
         return
     end
@@ -93,6 +94,7 @@ end
 --- Give player an item
 --- @param item InventoryItem: Item to give player
 function MatchPlayer:giveItem(item)
+    print(item.name .. " new given item " .. item.uid) --- DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG (test printing item uid on give)
     table.insert(self.inventory, item)
 end
 
@@ -106,6 +108,56 @@ function MatchPlayer:giveItemByName(name)
         end
     end
     print("Could not find item with name "..name)
+end
+
+--- Get item by uid from inventory
+--- @param uid string: Item to find by UID
+--- @return InventoryItem: found item OR nil if nothing found
+function MatchPlayer:getItemByUid(uid)
+    for _, item in ipairs(self.inventory) do
+        if (item.uid == uid) then
+            return item
+        end
+    end
+
+    return nil
+end
+
+--- Link item to ability from ability name and item UID
+--- @param ability_name string: Weapon ability name / ID
+--- @param item_uid string: Item to find by UID
+function MatchPlayer:addItemToAbility(ability_name, item_uid)
+    local weapon = self.ply:GetActiveWeapon()
+    if (weapon == nil) then
+        print("Tried to add item to uninitialized weapon!")
+        return
+    end
+
+    if (weapon.Base ~= "hero_base") then
+        print("Tried to add item to non OrbConquest weapon!")
+        return
+    end
+
+    local ability = weapon:GetWeaponAbility(ability_name)
+    local item = self:getItemByUid(item_uid)
+
+    if (ability == nil) then
+        print("Couldn't find ability by name " .. ability_name)
+        return
+    end
+
+    if (item == nil) then
+        print("Couldn't find item by UID " .. item_uid)
+        return
+    end
+
+    -- Remove item from all abilities
+    for _, ability in ipairs(weapon.Abilities) do
+        ability:removeItemByUid(item.uid)
+    end
+
+    -- Add item to ability
+    ability:addItem(item)
 end
 
 --- Create a new MatchPlayer object
@@ -126,7 +178,7 @@ function MatchPlayer:create(ply, match)
     local object = {}
     setmetatable(object, self)
     self.__index = self
-    self.ply = ply
-    self.match = match
+    object.ply = ply
+    object.match = match
     return object
 end

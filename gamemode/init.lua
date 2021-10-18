@@ -8,6 +8,7 @@ AddCSLuaFile("hud/helpers.lua")
 AddCSLuaFile("hud/hud.lua")
 AddCSLuaFile("hud/heroselect.lua")
 AddCSLuaFile("hud/inventory.lua")
+AddCSLuaFile("hud/indicators.lua")
 AddCSLuaFile("game/match_status.lua")
 AddCSLuaFile("game/item_types.lua")
 AddCSLuaFile("game/hero.lua")
@@ -30,6 +31,7 @@ include("game/server/item.lua") -- Provides: InventoryItem, class
 
 -- Load items
 include("game/server/items/test_orb.lua")
+include("game/server/items/explosion.lua")
 
 -- Create match
 ServerMatch = Match:create()

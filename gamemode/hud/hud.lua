@@ -4,7 +4,8 @@
 
 include("helpers.lua") -- Provides: HudHelpers, table
 include("heroselect.lua") -- Provides: HudHeroSelect, table
-include("inventory.lua") -- Provides: HudHeroSelect, table
+include("inventory.lua") -- Provides: HudInventory, table
+include("indicators.lua") -- Provides: HudDamageIndicators, table
 local drawStyledRectangle = HudHelpers.drawStyledRectangle
 
 GameHud = {}
@@ -53,7 +54,7 @@ GameHud = {
 function GameHud:draw()
     -- Debug weapon hud
     local weapon = LocalPlayer():GetActiveWeapon()
-    if (weapon ~= nil) then
+    if (weapon ~= nil and weapon.Abilities ~= nil) then
         local y = 50
         for key, value in pairs(weapon.Abilities) do
             local status, cdr = value:getCooldownStatus()
@@ -68,7 +69,6 @@ function GameHud:draw()
         end  
     end
     
-    
     -- Make sure ClientMatch is ready
     if (ClientMatch == nil) then
         return
@@ -78,6 +78,9 @@ function GameHud:draw()
         self.ready = true 
         self:create()
     end
+
+    -- Draw damage indicators
+    HudDamageIndicators:draw()
 
     -- Calculate screen scaling
     local padding = 50 * self.scale
@@ -95,6 +98,9 @@ end
 
 function GameHud:create()
     self.scale = ScrW() / 1920 -- TODO: make this better!
+    
+    -- Set up damage indicators
+    HudDamageIndicators:create()
     
     -- Create hooks for opening menus, etc ...
     hook.Add("PlayerButtonDown", "OB:GameHud.0", function(ply, button)

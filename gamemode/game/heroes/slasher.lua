@@ -7,7 +7,7 @@ include("../hero.lua")
 local hero = HeroDefinition:create()
 
 hero.display = "Slasher"
-hero.name = "test_hero"
+hero.name = "slasher"
 hero.weapon = "weapon_hero_slasher"
 
 table.insert(HeroRegistry, hero)

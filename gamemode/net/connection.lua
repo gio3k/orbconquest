@@ -119,6 +119,14 @@ else
         create_request(request_code, data)
         net.Send(player)
     end
+
+    --- Send a request to the server (self)
+    --- @param from_player Player: Player who "created" this request
+    --- @param request_code number: Request to ask the server
+    --- @param data string: Data to send the server
+    function client_request_to_self(from_player, request_code, data)
+        hook.Run(generic_net_string_hook_r0, request_code, data, from_player)
+    end
 end
 
 -- Start handling connections

@@ -14,6 +14,9 @@ InventoryItem = {
     --- Identifier name of item
     name = "",
 
+    -- UID, identifier of an item INSTANCE
+    uid = "",
+
     --- Type of item
     type = InventoryItemType.UNKNOWN,
 
@@ -32,5 +35,8 @@ function InventoryItem:create()
     local object = {}
     setmetatable(object, self)
     self.__index = self
+
+    -- Create UID for item (clean this up)
+    object.uid = math.floor(math.random(99999) * math.min(CurTime(), 2))
     return object
 end
