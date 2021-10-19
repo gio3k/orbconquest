@@ -80,15 +80,23 @@ function MatchPlayer:recieve(request_code, data)
 end
 
 --- Set player hero to specified hero
+--- If no hero is provided it will use the hero already set
 --- @param hero HeroDefinition: Hero to set player to
 function MatchPlayer:setHero(hero)
-    self.hero = hero
+    if (hero == nil and self.hero == nil) then
+        print("setHero was provided an invalid HeroDefinition and no fallback")
+        return
+    end
+
+    if (hero ~= nil) then
+        self.hero = hero
+    end
 
     -- Remove weapons from player first
     self.ply:StripWeapons()
 
     -- Add new hero weapon to player
-    self.ply:Give(hero.weapon)
+    self.ply:Give(self.hero.weapon)
 end
 
 --- Give player an item

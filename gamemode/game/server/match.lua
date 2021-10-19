@@ -43,8 +43,6 @@ function Match:hook()
         -- On request from client
         -- Give request to MatchPlayer that it's about
         if (ply.oc_matchplayer ~= nil) then
-            print("recieved request " .. request_code .. ", redirecting to player " .. ply:GetName())
-            print("matchplayer for them is " .. ply.oc_matchplayer.ply:GetName())
             ply.oc_matchplayer:recieve(request_code, data)
         else
             print("Player related to network request is not linked to a MatchPlayer. Updating Match instance...")
@@ -62,6 +60,11 @@ function Match:hook()
         local data = dmginfo:GetDamage() .. ";" .. position[1] .. ";" .. position[2] .. ";" .. position[3] .. ";" .. 0
 
         broadcast_request(NetworkDefinitions.SCRequestCode.DAMAGE_INDICATOR, data)
+    end)
+
+    hook.Add("PlayerSpawn", "OB:Match.2", function(ply)
+        -- Make sure player has class weapon etc after respawn
+        ply.oc_matchplayer:setHero()
     end)
 end
 
